@@ -1,8 +1,9 @@
 package user_manager
 
 import (
-	om "delinkcious/pkg/object_model"
 	"errors"
+
+	om "github.com/Brijeshlakkad/delinkcious/pkg/object_model"
 )
 
 type UserManager struct {

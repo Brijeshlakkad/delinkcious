@@ -2,10 +2,12 @@ package service
 
 import (
 	"context"
-	om "delinkcious/pkg/object_model"
 	"encoding/json"
+	"errors"
 	"net/http"
+	"strings"
 
+	om "github.com/Brijeshlakkad/delinkcious/pkg/object_model"
 	"github.com/go-kit/kit/endpoint"
 )
 
@@ -60,20 +62,22 @@ func decodeUnfollowRequest(_ context.Context, r *http.Request) (interface{}, err
 }
 
 func decodeGetFollowingRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	var request getByUsernameRequest
-	err := json.NewDecoder(r.Body).Decode(&request)
-	if err != nil {
-		return nil, err
+	parts := strings.Split(r.URL.Path, "/")
+	username := parts[len(parts)-1]
+	if username == "" || username == "following" {
+		return nil, errors.New("user name must not be empty")
 	}
+	request := getByUsernameRequest{Username: username}
 	return request, nil
 }
 
 func decodeGetFollowersRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	var request getByUsernameRequest
-	err := json.NewDecoder(r.Body).Decode(&request)
-	if err != nil {
-		return nil, err
+	parts := strings.Split(r.URL.Path, "/")
+	username := parts[len(parts)-1]
+	if username == "" || username == "followers" {
+		return nil, errors.New("user name must not be empty")
 	}
+	request := getByUsernameRequest{Username: username}
 	return request, nil
 }
 

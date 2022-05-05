@@ -1,17 +1,24 @@
-package main
+package service
 
 import (
 	"log"
 	"net/http"
 
-	lm "delinkcious/pkg/link_manager"
-	sgm "delinkcious/pkg/social_graph_client"
+	"github.com/Brijeshlakkad/delinkcious/pkg/db_util"
+	"github.com/gorilla/mux"
 
+	lm "github.com/Brijeshlakkad/delinkcious/pkg/link_manager"
+	sgm "github.com/Brijeshlakkad/delinkcious/pkg/social_graph_client"
 	httptransport "github.com/go-kit/kit/transport/http"
 )
 
-func main() {
-	store, err := lm.NewDbLinkStore("localhost", 5432, "postgres", "postgres")
+func Run() {
+	dbHost, dbPort, err := db_util.GetDbEndpoint("social_graph")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	store, err := lm.NewDbLinkStore(dbHost, dbPort, "postgres", "postgres")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -50,10 +57,12 @@ func main() {
 		encodeResponse,
 	)
 
-	http.Handle("/links", getLinksHandler)
-	http.Handle("/addLink", addLinkHandler)
-	http.Handle("/updateLink", updateLinkHandler)
-	http.Handle("/deleteLink", deleteLinkHandler)
+	r := mux.NewRouter()
+	r.Methods("GET").Path("/links").Handler(getLinksHandler)
+	r.Methods("POST").Path("/links").Handler(addLinkHandler)
+	r.Methods("PUT").Path("/links").Handler(updateLinkHandler)
+	r.Methods("DELETE").Path("/links").Handler(deleteLinkHandler)
 
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Println("Listening on port 8080...")
+	log.Fatal(http.ListenAndServe(":8080", r))
 }

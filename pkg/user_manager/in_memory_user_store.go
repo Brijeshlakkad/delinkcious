@@ -1,10 +1,11 @@
 package user_manager
 
 import (
-	om "delinkcious/pkg/object_model"
 	"errors"
 	"math/rand"
 	"strconv"
+
+	om "github.com/Brijeshlakkad/delinkcious/pkg/object_model"
 )
 
 type InMemoryUserStore struct {

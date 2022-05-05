@@ -1,11 +1,11 @@
-package main
+package service
 
 import (
 	"context"
-	om "delinkcious/pkg/object_model"
 	"encoding/json"
 	"net/http"
 
+	om "github.com/Brijeshlakkad/delinkcious/pkg/object_model"
 	"github.com/go-kit/kit/endpoint"
 )
 

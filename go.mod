@@ -1,4 +1,4 @@
-module delinkcious
+module github.com/Brijeshlakkad/delinkcious
 
 go 1.17
 

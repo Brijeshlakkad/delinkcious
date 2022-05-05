@@ -1,8 +1,7 @@
 package social_graph_manager
 
 import (
-	om "delinkcious/pkg/object_model"
-
+	om "github.com/Brijeshlakkad/delinkcious/pkg/object_model"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

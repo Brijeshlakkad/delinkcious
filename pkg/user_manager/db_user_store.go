@@ -2,11 +2,11 @@ package user_manager
 
 import (
 	"database/sql"
-	om "delinkcious/pkg/object_model"
-	"fmt"
 	"math/rand"
 	"strconv"
 
+	"github.com/Brijeshlakkad/delinkcious/pkg/db_util"
+	om "github.com/Brijeshlakkad/delinkcious/pkg/object_model"
 	sq "github.com/Masterminds/squirrel"
 	_ "github.com/lib/pq"
 )
@@ -16,10 +16,10 @@ type DbUserStore struct {
 	sb sq.StatementBuilderType
 }
 
+const dbName = "user_manager"
+
 func NewDbUserStore(host string, port int, username string, password string) (store *DbUserStore, err error) {
-	mask := "host=%s port=%d user=%s password=%s dbname=user_manager sslmode=disable"
-	dcn := fmt.Sprintf(mask, host, port, username, password)
-	db, err := sql.Open("postgres", dcn)
+	db, err := db_util.EnsureDB(host, port, username, password, dbName)
 	if err != nil {
 		return
 	}
@@ -65,7 +65,6 @@ func createSchema(db *sql.DB) (err error) {
 
 func (s *DbUserStore) Register(user om.User) (err error) {
 	cmd := s.sb.Insert("users").Columns("name", "email").Values(user.Name, user.Email)
-	fmt.Println(cmd.ToSql())
 	_, err = cmd.RunWith(s.db).Exec()
 	return
 }
@@ -78,14 +77,13 @@ func (s *DbUserStore) Login(username string, authToken string) (session string, 
 	}
 
 	var user_id int
-	q.QueryRow().Scan(&user_id)
+	err = q.RunWith(s.db).QueryRow().Scan(&user_id)
 	if err != nil {
 		return
 	}
 
 	session = strconv.Itoa(rand.Int())
 	cmd := s.sb.Insert("sessions").Columns("user_id", "session").Values(user_id, session)
-	fmt.Println(cmd.ToSql())
 	_, err = cmd.RunWith(s.db).Exec()
 	return
 }

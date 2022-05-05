@@ -1,4 +1,4 @@
-package social_graph_client
+package user_client
 
 import (
 	"bytes"
@@ -13,7 +13,7 @@ import (
 	httptransport "github.com/go-kit/kit/transport/http"
 )
 
-func NewClient(baseURL string) (om.SocialGraphManager, error) {
+func NewClient(baseURL string) (om.UserManager, error) {
 	// Quickly sanitize the instance string.
 	if !strings.HasPrefix(baseURL, "http") {
 		baseURL = "http://" + baseURL
@@ -23,38 +23,31 @@ func NewClient(baseURL string) (om.SocialGraphManager, error) {
 		return nil, err
 	}
 
-	followEndpoint := httptransport.NewClient(
+	registerEndpoint := httptransport.NewClient(
 		"POST",
-		copyURL(u, "/follow"),
+		copyURL(u, "/register"),
 		encodeHTTPGenericRequest,
 		decodeSimpleResponse).Endpoint()
 
-	unfollowEndpoint := httptransport.NewClient(
+	loginEndpoint := httptransport.NewClient(
 		"POST",
-		copyURL(u, "/unfollow"),
+		copyURL(u, "/login"),
+		encodeHTTPGenericRequest,
+		decodeLoginResponse).Endpoint()
+
+	logoutEndpoint := httptransport.NewClient(
+		"POST",
+		copyURL(u, "/logout"),
 		encodeHTTPGenericRequest,
 		decodeSimpleResponse).Endpoint()
-
-	getFollowingEndpoint := httptransport.NewClient(
-		"GET",
-		copyURL(u, "/following"),
-		encodeGetByUsernameRequest,
-		decodeGetFollowingResponse).Endpoint()
-
-	getFollowersEndpoint := httptransport.NewClient(
-		"GET",
-		copyURL(u, "/followers"),
-		encodeGetByUsernameRequest,
-		decodeGetFollowersResponse).Endpoint()
 
 	// Returning the EndpointSet as an interface relies on the
 	// EndpointSet implementing the Service methods. That's just a simple bit
 	// of glue code.
 	return EndpointSet{
-		FollowEndpoint:       followEndpoint,
-		UnfollowEndpoint:     unfollowEndpoint,
-		GetFollowingEndpoint: getFollowingEndpoint,
-		GetFollowersEndpoint: getFollowersEndpoint,
+		RegisterEndpoint: registerEndpoint,
+		LoginEndpoint:    loginEndpoint,
+		LogoutEndpoint:   logoutEndpoint,
 	}, nil
 }
 
@@ -73,12 +66,4 @@ func encodeHTTPGenericRequest(_ context.Context, r *http.Request, request interf
 	}
 	r.Body = ioutil.NopCloser(&buf)
 	return nil
-}
-
-// Extract the username from the incoming request and add it to the path
-func encodeGetByUsernameRequest(ctx context.Context, req *http.Request, request interface{}) error {
-	r := request.(getByUserNameRequest)
-	username := url.PathEscape(r.Username)
-	req.URL.Path += "/" + username
-	return encodeHTTPGenericRequest(ctx, req, request)
 }

@@ -1,29 +1,44 @@
 package service
 
 import (
-	sgm "delinkcious/pkg/social_graph_manager"
-	"errors"
 	"log"
 	"net/http"
+	"os"
+	"strconv"
 
+	sgm "github.com/Brijeshlakkad/delinkcious/pkg/social_graph_manager"
 	httptransport "github.com/go-kit/kit/transport/http"
 	"github.com/gorilla/mux"
 )
 
-var (
-	// return when an expected path variable is missing.
-	BadRoutingError = errors.New("inconsistent mapping between route and handler")
-)
+func check(err error) {
+	if err != nil {
+		log.Fatal(err)
+	}
+}
 
 func Run() {
-	store, err := sgm.NewDbSocialGraphStore("localhost", 5432, "postgres", "postgres")
-	if err != nil {
-		log.Fatal(err)
+	log.Println("Service started...")
+	dbHost := os.Getenv("SOCIAL_GRAPH_DB_SERVICE_HOST")
+	if dbHost == "" {
+		dbHost = "localhost"
 	}
+
+	port := os.Getenv("SOCIAL_GRAPH_DB_SERVICE_PORT")
+	if port == "" {
+		port = "5432"
+	}
+
+	log.Println("DB host:", dbHost, "DB port:", port)
+
+	dbPort, err := strconv.Atoi(port)
+	check(err)
+
+	store, err := sgm.NewDbSocialGraphStore(dbHost, dbPort, "postgres", "postgres")
+	check(err)
+
 	svc, err := sgm.NewSocialGraphManager(store)
-	if err != nil {
-		log.Fatal(err)
-	}
+	check(err)
 
 	followHandler := httptransport.NewServer(
 		makeFollowEndpoint(svc),

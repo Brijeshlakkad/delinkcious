@@ -1,8 +1,8 @@
 package user_manager
 
 import (
-	om "delinkcious/pkg/object_model"
-
+	"github.com/Brijeshlakkad/delinkcious/pkg/db_util"
+	om "github.com/Brijeshlakkad/delinkcious/pkg/object_model"
 	sq "github.com/Masterminds/squirrel"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -11,15 +11,17 @@ import (
 var _ = Describe("user manager tests with DB ", func() {
 	var userStore *DbUserStore
 	var userManager om.UserManager
-	var err error
 	var deleteAll = func() {
 		sq.Delete("users").RunWith(userStore.db).Exec()
 		sq.Delete("sessions").RunWith(userStore.db).Exec()
 	}
 
 	BeforeSuite(func() {
-		userStore, err = NewDbUserStore("localhost", 5432, "postgres", "postgres")
+		dbHost, dbPort, err := db_util.GetDbEndpoint("user")
 		Ω(err).Should(BeNil())
+		userStore, err = NewDbUserStore(dbHost, dbPort, "postgres", "postgres")
+		Ω(err).Should(BeNil())
+		Ω(userStore).ShouldNot(BeNil())
 		userManager, err = NewUserManager(userStore)
 		Ω(err).Should(BeNil())
 		Ω(userManager).ShouldNot(BeNil())

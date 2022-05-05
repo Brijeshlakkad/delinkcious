@@ -1,11 +1,12 @@
 package link_manager
 
 import (
-	om "delinkcious/pkg/object_model"
 	"errors"
 	"fmt"
 	"regexp"
 	"time"
+
+	om "github.com/Brijeshlakkad/delinkcious/pkg/object_model"
 )
 
 // User links are a map of url:TaggedLink
@@ -81,7 +82,7 @@ func (m *InMemoryLinkStore) AddLink(request om.AddLinkRequest) (link *om.Link, e
 	}
 
 	if request.Username == "" {
-		err = errors.New("user name can't be empty")
+		err = errors.New("User name can't be empty")
 		return
 	}
 
@@ -143,7 +144,7 @@ func (m *InMemoryLinkStore) DeleteLink(username string, url string) error {
 	}
 
 	if username == "" {
-		return errors.New("user name can't be empty")
+		return errors.New("User name can't be empty")
 	}
 
 	userLinks := (*m)[username]
