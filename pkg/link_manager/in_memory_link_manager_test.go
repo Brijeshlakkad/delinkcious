@@ -1,52 +1,29 @@
 package link_manager
 
 import (
-	"log"
-
-	"github.com/Brijeshlakkad/delinkcious/pkg/db_util"
 	om "github.com/Brijeshlakkad/delinkcious/pkg/object_model"
-	sq "github.com/Masterminds/squirrel"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("DB link store tests", func() {
-	var linkStore *DbLinkStore
-	var deleteAll = func() {
-		sq.Delete("links").RunWith(linkStore.db).Exec()
-		sq.Delete("tags").RunWith(linkStore.db).Exec()
-	}
-	BeforeSuite(func() {
-		var err error
-		dbHost, dbPort, err := db_util.GetDbEndpoint("link_manager")
+var _ = Describe("In-memory link manager tests", func() {
+	var err error
+	var linkManager om.LinkManager
+
+	BeforeEach(func() {
+		linkManager, err = NewLinkManager(NewInMemoryLinkStore(),
+			nil,
+			nil,
+			10)
 		Ω(err).Should(BeNil())
-
-		linkStore, err = NewDbLinkStore(dbHost, dbPort, "postgres", "postgres")
-		if err != nil {
-			_, err = db_util.RunLocalDB("postgres")
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			linkStore, err = NewDbLinkStore(dbHost, dbPort, "postgres", "postgres")
-			if err != nil {
-				log.Fatal(err)
-			}
-		}
-
-		Ω(err).Should(BeNil())
-		Ω(linkStore).ShouldNot(BeNil())
 	})
-
-	BeforeEach(deleteAll)
-	AfterSuite(deleteAll)
 
 	It("should add and get links", func() {
 		// No links initially
 		r := om.GetLinksRequest{
 			Username: "gigi",
 		}
-		res, err := linkStore.GetLinks(r)
+		res, err := linkManager.GetLinks(r)
 		Ω(err).Should(BeNil())
 		Ω(res.Links).Should(HaveLen(0))
 
@@ -57,10 +34,10 @@ var _ = Describe("DB link store tests", func() {
 			Title:    "Golang",
 			Tags:     map[string]bool{"programming": true},
 		}
-		_, err = linkStore.AddLink(r2)
+		err = linkManager.AddLink(r2)
 		Ω(err).Should(BeNil())
 
-		res, err = linkStore.GetLinks(r)
+		res, err = linkManager.GetLinks(r)
 		Ω(err).Should(BeNil())
 		Ω(res.Links).Should(HaveLen(1))
 		link := res.Links[0]
@@ -77,7 +54,7 @@ var _ = Describe("DB link store tests", func() {
 			Title:    "Golang",
 			Tags:     map[string]bool{"programming": true},
 		}
-		_, err := linkStore.AddLink(r)
+		err := linkManager.AddLink(r)
 		Ω(err).Should(BeNil())
 
 		r2 := om.UpdateLinkRequest{
@@ -86,11 +63,11 @@ var _ = Describe("DB link store tests", func() {
 			Description: "The main web site for the Go programming language",
 			RemoveTags:  map[string]bool{"programming": true},
 		}
-		_, err = linkStore.UpdateLink(r2)
+		err = linkManager.UpdateLink(r2)
 		Ω(err).Should(BeNil())
 
 		r3 := om.GetLinksRequest{Username: "gigi"}
-		res, err := linkStore.GetLinks(r3)
+		res, err := linkManager.GetLinks(r3)
 		Ω(err).Should(BeNil())
 		Ω(res.Links).Should(HaveLen(1))
 		link := res.Links[0]
@@ -106,21 +83,21 @@ var _ = Describe("DB link store tests", func() {
 			Title:    "Golang",
 			Tags:     map[string]bool{"programming": true},
 		}
-		_, err := linkStore.AddLink(r)
+		err := linkManager.AddLink(r)
 		Ω(err).Should(BeNil())
 
 		// Should have 1 link
 		r2 := om.GetLinksRequest{Username: "gigi"}
-		res, err := linkStore.GetLinks(r2)
+		res, err := linkManager.GetLinks(r2)
 		Ω(err).Should(BeNil())
 		Ω(res.Links).Should(HaveLen(1))
 
 		// Delete the link
-		err = linkStore.DeleteLink("gigi", r.Url)
+		err = linkManager.DeleteLink("gigi", r.Url)
 		Ω(err).Should(BeNil())
 
 		// There should be no more links
-		res, err = linkStore.GetLinks(r2)
+		res, err = linkManager.GetLinks(r2)
 		Ω(err).Should(BeNil())
 		Ω(res.Links).Should(HaveLen(0))
 	})

@@ -1,15 +1,17 @@
 package service
 
 import (
+	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"strconv"
 
 	"github.com/Brijeshlakkad/delinkcious/pkg/db_util"
-	"github.com/gorilla/mux"
-
 	lm "github.com/Brijeshlakkad/delinkcious/pkg/link_manager"
 	sgm "github.com/Brijeshlakkad/delinkcious/pkg/social_graph_client"
 	httptransport "github.com/go-kit/kit/transport/http"
+	"github.com/gorilla/mux"
 )
 
 func Run() {
@@ -23,12 +25,37 @@ func Run() {
 		log.Fatal(err)
 	}
 
-	socialGraphClient, err := sgm.NewClient("localhost:9090")
+	sgHost := os.Getenv("SOCIAL_GRAPH_SERVICE_HOST")
+	if sgHost == "" {
+		sgHost = "localhost"
+	}
+
+	sgPort := os.Getenv("SOCIAL_GRAPH_SERVICE_PORT")
+	if sgPort == "" {
+		sgPort = "9090"
+	}
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	maxLinksPerUserStr := os.Getenv("MAX_LINKS_PER_USER")
+	if maxLinksPerUserStr == "" {
+		maxLinksPerUserStr = "10"
+	}
+
+	maxLinksPerUser, err := strconv.ParseInt(os.Getenv("MAX_LINKS_PER_USER"), 10, 64)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	svc, err := lm.NewLinkManager(store, socialGraphClient, nil)
+	socialGraphClient, err := sgm.NewClient(fmt.Sprintf("%s:%s", sgHost, sgPort))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	svc, err := lm.NewLinkManager(store, socialGraphClient, nil, maxLinksPerUser)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -63,6 +90,6 @@ func Run() {
 	r.Methods("PUT").Path("/links").Handler(updateLinkHandler)
 	r.Methods("DELETE").Path("/links").Handler(deleteLinkHandler)
 
-	log.Println("Listening on port 8080...")
-	log.Fatal(http.ListenAndServe(":8080", r))
+	log.Printf("Listening on port %s...\n", port)
+	log.Fatal(http.ListenAndServe(":"+port, r))
 }
