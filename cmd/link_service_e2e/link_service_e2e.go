@@ -37,6 +37,7 @@ func runService(ctx context.Context, targetDir string, service string) {
 	defer os.Chdir(wd)
 
 	// Build the server if needed
+	os.Chdir(targetDir)
 	_, err = os.Stat("./" + service)
 	if os.IsNotExist(err) {
 		out, err := exec.Command("go", "build", ".").CombinedOutput()
@@ -51,14 +52,20 @@ func runService(ctx context.Context, targetDir string, service string) {
 
 func runLinkService(ctx context.Context) {
 	// Set environment
-	err := os.Setenv("MAX_LINKS_PER_USER", "10")
+	err := os.Setenv("PORT", "8080")
+	check(err)
+
+	err = os.Setenv("MAX_LINKS_PER_USER", "10")
 	check(err)
 
 	runService(ctx, ".", "link_service")
 }
 
 func runSocialGraphService(ctx context.Context) {
-	runService(ctx, "../social_graph_service", "link_service")
+	err := os.Setenv("PORT", "9090")
+	check(err)
+
+	runService(ctx, "../social_graph_service", "social_graph_service")
 }
 
 func killServer(ctx context.Context) {
@@ -66,12 +73,22 @@ func killServer(ctx context.Context) {
 }
 
 func main() {
+	// Turn on authentication
+	err := os.Setenv("DELINKCIOUS_MUTUAL_AUTH", "true")
+	check(err)
+
 	initDB()
 
 	ctx := context.Background()
 	defer killServer(ctx)
-	runSocialGraphService(ctx)
-	runLinkService(ctx)
+
+	if os.Getenv("RUN_SOCIAL_GRAPH_SERVICE") == "true" {
+		runSocialGraphService(ctx)
+	}
+
+	if os.Getenv("RUN_LINK_SERVICE") == "true" {
+		runLinkService(ctx)
+	}
 
 	// Run some tests with the client
 	cli, err := link_manager_client.NewClient("localhost:8080")

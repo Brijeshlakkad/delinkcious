@@ -9,10 +9,26 @@ import (
 
 	"github.com/Brijeshlakkad/delinkcious/pkg/db_util"
 	lm "github.com/Brijeshlakkad/delinkcious/pkg/link_manager"
+	om "github.com/Brijeshlakkad/delinkcious/pkg/object_model"
 	sgm "github.com/Brijeshlakkad/delinkcious/pkg/social_graph_client"
 	httptransport "github.com/go-kit/kit/transport/http"
 	"github.com/gorilla/mux"
 )
+
+type EventSink struct {
+}
+
+func (s *EventSink) OnLinkAdded(username string, link *om.Link) {
+	//log.Println("Link added")
+}
+
+func (s *EventSink) OnLinkUpdated(username string, link *om.Link) {
+	//log.Println("Link updated")
+}
+
+func (s *EventSink) OnLinkDeleted(username string, url string) {
+	//log.Println("Link deleted")
+}
 
 func Run() {
 	dbHost, dbPort, err := db_util.GetDbEndpoint("social_graph")
@@ -55,7 +71,7 @@ func Run() {
 		log.Fatal(err)
 	}
 
-	svc, err := lm.NewLinkManager(store, socialGraphClient, nil, maxLinksPerUser)
+	svc, err := lm.NewLinkManager(store, socialGraphClient, &EventSink{}, maxLinksPerUser)
 	if err != nil {
 		log.Fatal(err)
 	}
