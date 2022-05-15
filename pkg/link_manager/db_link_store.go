@@ -48,21 +48,20 @@ func createSchema(db *sql.DB) (err error) {
         CREATE TABLE IF NOT EXISTS links (
           id SERIAL   PRIMARY KEY,
 		  username    TEXT,
-          url TEXT    UNIQUE NOT NULL,
-          title TEXT  UNIQUE NOT NULL,
+          url TEXT    NOT NULL,
+          title TEXT  NOT NULL,
 		  description TEXT,
 		  created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 		  updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP          
         );
-		CREATE UNIQUE INDEX IF NOT EXISTS links_username_idx ON links(username);
-
+		CREATE INDEX IF NOT EXISTS links_username_idx ON links(username);
 
         CREATE TABLE IF NOT EXISTS tags (
           id SERIAL PRIMARY KEY,
           link_id   INTEGER REFERENCES links(id) ON DELETE CASCADE,			
           name      TEXT		  
         );
-        CREATE UNIQUE INDEX IF NOT EXISTS tags_name_idx ON tags(name);
+        CREATE INDEX IF NOT EXISTS tags_name_idx ON tags(name);
     `
 
 	_, err = db.Exec(schema)

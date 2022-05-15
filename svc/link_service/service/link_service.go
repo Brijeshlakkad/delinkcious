@@ -9,6 +9,7 @@ import (
 
 	"github.com/Brijeshlakkad/delinkcious/pkg/db_util"
 	lm "github.com/Brijeshlakkad/delinkcious/pkg/link_manager"
+	nats "github.com/Brijeshlakkad/delinkcious/pkg/link_manager_events"
 	om "github.com/Brijeshlakkad/delinkcious/pkg/object_model"
 	sgm "github.com/Brijeshlakkad/delinkcious/pkg/social_graph_client"
 	httptransport "github.com/go-kit/kit/transport/http"
@@ -41,12 +42,12 @@ func Run() {
 		log.Fatal(err)
 	}
 
-	sgHost := os.Getenv("SOCIAL_GRAPH_SERVICE_HOST")
+	sgHost := os.Getenv("SOCIAL_GRAPH_MANAGER_SERVICE_HOST")
 	if sgHost == "" {
 		sgHost = "localhost"
 	}
 
-	sgPort := os.Getenv("SOCIAL_GRAPH_SERVICE_PORT")
+	sgPort := os.Getenv("SOCIAL_GRAPH_MANAGER_SERVICE_PORT")
 	if sgPort == "" {
 		sgPort = "9090"
 	}
@@ -71,7 +72,21 @@ func Run() {
 		log.Fatal(err)
 	}
 
-	svc, err := lm.NewLinkManager(store, socialGraphClient, &EventSink{}, maxLinksPerUser)
+	natsHostname := os.Getenv("NATS_CLUSTER_SERVICE_HOST")
+	natsPort := os.Getenv("NATS_CLUSTER_SERVICE_PORT")
+
+	var eventSink om.LinkManagerEvents
+	if natsHostname != "" {
+		natsUrl := natsHostname + ":" + natsPort
+		eventSink, err = nats.NewEventSender(natsUrl)
+		if err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		eventSink = &EventSink{}
+	}
+
+	svc, err := lm.NewLinkManager(store, socialGraphClient, eventSink, maxLinksPerUser)
 	if err != nil {
 		log.Fatal(err)
 	}

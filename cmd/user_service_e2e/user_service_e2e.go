@@ -3,11 +3,10 @@ package main
 import (
 	"context"
 	"log"
-	"os"
-	"os/exec"
 
 	"github.com/Brijeshlakkad/delinkcious/pkg/db_util"
 	om "github.com/Brijeshlakkad/delinkcious/pkg/object_model"
+	. "github.com/Brijeshlakkad/delinkcious/pkg/test_util"
 	"github.com/Brijeshlakkad/delinkcious/pkg/user_client"
 	_ "github.com/lib/pq"
 )
@@ -31,30 +30,12 @@ func initDB() {
 	}
 }
 
-func runService(ctx context.Context) {
-	// Build the server if needed
-	_, err := os.Stat("./user_service")
-	if os.IsNotExist(err) {
-		out, err := exec.Command("go", "build", ".").CombinedOutput()
-		log.Println(out)
-		check(err)
-	}
-
-	cmd := exec.CommandContext(ctx, "./user_service")
-	err = cmd.Start()
-	check(err)
-}
-
-func killServer(ctx context.Context) {
-	ctx.Done()
-}
-
 func main() {
 	initDB()
 
 	ctx := context.Background()
-	defer killServer(ctx)
-	runService(ctx)
+	defer KillServer(ctx)
+	RunService(ctx, ".", "user_service")
 
 	// Run some tests with the client
 	cli, err := user_client.NewClient("localhost:7070")

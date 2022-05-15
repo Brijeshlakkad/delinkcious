@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - name: user-manager
-        image: brijeshlakkad/delinkcious-user:0.3
+        image: g1g1/delinkcious-user:0.3
         imagePullPolicy: Always
         ports:
         - containerPort: 7070

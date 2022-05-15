@@ -14,7 +14,7 @@ RUN go get
 RUN CGO_ENABLED=0 GOOS=linux go build -o /link_service -a -tags netgo -ldflags '-s -w' .
 
 FROM scratch
-MAINTAINER Brijesh Lakkad <brijeshlakkad22@com>
+MAINTAINER Brijesh Lakkad <brijeshlakkad22@gmail.com>
 COPY --from=builder /link_service /app/link_service
 EXPOSE 7070
 ENTRYPOINT ["/app/link_service"]
