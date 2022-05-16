@@ -31,9 +31,8 @@ If you want to push a local minikube make sure your kuectl is pointed to the rig
 $ kubectl apply -f k8s
 ```
 
+## Exposing the LinkManager service locally
 
-
-
-
-
-
+```
+kubectl port-forward svc/link-manager 8080:8080
+```

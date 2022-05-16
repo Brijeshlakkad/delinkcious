@@ -30,10 +30,3 @@ If you want to push a local minikube make sure your kuectl is pointed to the rig
 ```
 $ kubectl apply -f k8s
 ```
-
-
-
-
-
-
-

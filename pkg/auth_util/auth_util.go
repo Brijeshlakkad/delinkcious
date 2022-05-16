@@ -1,10 +1,11 @@
 package auth_util
 
 import (
-	_ "github.com/lib/pq"
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
+
+	_ "github.com/lib/pq"
+	"gopkg.in/yaml.v3"
 )
 
 const callersFilename = "/etc/delinkcious/mutual-auth.yaml"

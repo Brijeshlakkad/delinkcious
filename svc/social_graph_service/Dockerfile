@@ -1,6 +1,12 @@
-FROM golang:1.11 AS builder
+FROM golang:alpine AS builder
+
+WORKDIR $GOROOT/src/github.com/Brijeshlakkad/delinkcious/svc/social_graph_service
+
 ADD ./main.go main.go
 ADD ./service service
+
+RUN go mod init social_graph_service
+
 # Fetch dependencies
 RUN go get -d -v
 
