@@ -18,7 +18,7 @@ It uses a multi-stage [Dockerfile](Dockerfile) to generate a lean and mean image
 ## Build Docker image
 
 ```
-$ docker build . -t g1g1/delinkcious-news-manager:${VERSION}
+$ docker build -t brijeshlakkad/delinkcious-news:0.3 .
 ```
 
 ## Push to Registry
@@ -32,7 +32,7 @@ $ docker login
 Then push your image:
 
 ```
-$ docker push g1g1/delinkcious-news-manager:${VERSION}
+$ docker push brijeshlakkad/delinkcious-news:0.3
 ```
 
 ## Deploy to active Kubernetes cluster
@@ -46,7 +46,7 @@ $ kubectl create -f k8s
 ## Exposing the NewsManager service locally
 
 ```
-kubectl port-forward svc/news-manager 6060:6060
+kubectl port-forward brijeshlakkad/news 6060:6060
 ```
 
 
