@@ -1,15 +1,16 @@
-apiVersion: networking.k8s.io/v1
+apiVersion: networking.k8s.io/v1beta1 # for versions before 1.14 use extensions/v1beta1
 kind: Ingress
 metadata:
-  name: minimal-ingress
+  name: api-gateway
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
 spec:
   rules:
-  - http:
-    paths:
-    - path: /*
-      backend:
-        serviceName: api-gateway
-        servicePort: 80
+  - host: delinkcio.us
+    http:
+      paths:
+      - path: /*
+        backend:
+          serviceName: api-gateway
+          servicePort: 80

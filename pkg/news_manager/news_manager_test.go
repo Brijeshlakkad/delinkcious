@@ -10,7 +10,7 @@ var _ = Describe("In-memory link manager tests", func() {
 	var newsManager *NewsManager
 
 	BeforeEach(func() {
-		nm, err := NewNewsManager("", "")
+		nm, err := NewNewsManager(NewInMemoryNewsStore(), "", "")
 		Ω(err).Should(BeNil())
 		newsManager = nm.(*NewsManager)
 		Ω(newsManager).ShouldNot(BeNil())
@@ -19,7 +19,7 @@ var _ = Describe("In-memory link manager tests", func() {
 	It("should get news", func() {
 		// No news initially
 		r := om.GetNewsRequest{
-			Username: "gigi",
+			Username: "brijesh",
 		}
 		res, err := newsManager.GetNews(r)
 		Ω(err).Should(BeNil())
@@ -30,7 +30,7 @@ var _ = Describe("In-memory link manager tests", func() {
 			Url:   "http://123.com",
 			Title: "123",
 		}
-		newsManager.OnLinkAdded("gigi", link)
+		newsManager.OnLinkAdded("brijesh", link)
 		res, err = newsManager.GetNews(r)
 		Ω(err).Should(BeNil())
 		Ω(res.Events).Should(HaveLen(1))
@@ -40,7 +40,7 @@ var _ = Describe("In-memory link manager tests", func() {
 
 		// Update a link
 		link.Title = "New Title"
-		newsManager.OnLinkUpdated("gigi", link)
+		newsManager.OnLinkUpdated("brijesh", link)
 		res, err = newsManager.GetNews(r)
 		Ω(err).Should(BeNil())
 		Ω(res.Events).Should(HaveLen(2))
@@ -53,7 +53,7 @@ var _ = Describe("In-memory link manager tests", func() {
 		Ω(event.Url).Should(Equal("http://123.com"))
 
 		// Delete a link
-		newsManager.OnLinkDeleted("gigi", link.Url)
+		newsManager.OnLinkDeleted("brijesh", link.Url)
 		res, err = newsManager.GetNews(r)
 		Ω(err).Should(BeNil())
 		Ω(res.Events).Should(HaveLen(3))

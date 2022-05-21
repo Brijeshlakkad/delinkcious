@@ -41,16 +41,16 @@ func main() {
 	cli, err := user_client.NewClient("localhost:7070")
 	check(err)
 
-	err = cli.Register(om.User{"gg@gg.com", "gigi"})
+	err = cli.Register(om.User{"gg@gg.com", "brijesh"})
 	check(err)
-	log.Print("gigi has registered successfully")
+	log.Print("brijesh has registered successfully")
 
-	session, err := cli.Login("gigi", "secret")
+	session, err := cli.Login("brijesh", "secret")
 	check(err)
-	log.Print("gigi has logged in successfully. the session is: ", session)
+	log.Print("brijesh has logged in successfully. the session is: ", session)
 
-	err = cli.Logout("gigi", session)
+	err = cli.Logout("brijesh", session)
 	check(err)
-	log.Print("gigi has logged out successfully.")
+	log.Print("brijesh has logged out successfully.")
 
 }

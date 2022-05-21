@@ -23,6 +23,12 @@ func runNewsService(ctx context.Context) {
 	err = os.Setenv("NATS_CLUSTER_SERVICE_PORT", "4222")
 	Check(err)
 
+	err = os.Setenv("NEWS_MANAGER_REDIS_SERVICE_HOST", "localhost")
+	Check(err)
+
+	err = os.Setenv("NEWS_MANAGER_REDIS_SERVICE_PORT", "6379")
+	Check(err)
+
 	if os.Getenv("RUN_NEWS_SERVICE") != "false" {
 		RunService(ctx, ".", "news_service")
 	}
@@ -33,7 +39,13 @@ func main() {
 	defer KillServer(ctx)
 
 	fmt.Println("Launching local NATS server...")
-	RunLocalNatsServer()
+	err := RunLocalNatsServer()
+	Check(err)
+	time.Sleep(time.Second * 1)
+
+	fmt.Println("Launching local Redis server...")
+	err = RunLocalRedisServer()
+	Check(err)
 	time.Sleep(time.Second * 1)
 
 	if os.Getenv("RUN_NEWS_SERVICE") != "false" {
@@ -52,11 +64,11 @@ func main() {
 
 	time.Sleep(time.Second * 1)
 	fmt.Println("Sending OnLinkAdded event...")
-	sender.OnLinkAdded("gigi", &om.Link{Url: "http://example.org", Title: "Example"})
+	sender.OnLinkAdded("brijesh", &om.Link{Url: "http://example.org", Title: "Example"})
 	time.Sleep(time.Second * 1)
 
 	fmt.Println("Fetching news...")
-	res, err := cli.GetNews(om.GetNewsRequest{Username: "gigi"})
+	res, err := cli.GetNews(om.GetNewsRequest{Username: "brijesh"})
 	Check(err)
 
 	for _, e := range res.Events {

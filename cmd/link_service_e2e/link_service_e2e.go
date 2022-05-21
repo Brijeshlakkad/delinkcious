@@ -63,26 +63,26 @@ func main() {
 	cli, err := link_manager_client.NewClient("localhost:8080")
 	Check(err)
 
-	links, err := cli.GetLinks(om.GetLinksRequest{Username: "gigi"})
+	links, err := cli.GetLinks(om.GetLinksRequest{Username: "brijesh"})
 	Check(err)
-	log.Print("gigi's links:", links)
+	log.Print("brijesh's links:", links)
 
-	err = cli.AddLink(om.AddLinkRequest{Username: "gigi",
-		Url:   "https://github.com/the-gigi",
-		Title: "Gigi on Github",
+	err = cli.AddLink(om.AddLinkRequest{Username: "brijesh",
+		Url:   "https://github.com/Brijeshlakkad",
+		Title: "Brijesh on Github",
 		Tags:  map[string]bool{"programming": true}})
 	Check(err)
-	links, err = cli.GetLinks(om.GetLinksRequest{Username: "gigi"})
+	links, err = cli.GetLinks(om.GetLinksRequest{Username: "brijesh"})
 	Check(err)
-	log.Print("gigi's links:", links)
+	log.Print("brijesh's links:", links)
 
-	err = cli.UpdateLink(om.UpdateLinkRequest{Username: "gigi",
-		Url:         "https://github.com/the-gigi",
+	err = cli.UpdateLink(om.UpdateLinkRequest{Username: "brijesh",
+		Url:         "https://github.com/Brijeshlakkad",
 		Description: "Most of my open source code is here"},
 	)
 
 	Check(err)
-	links, err = cli.GetLinks(om.GetLinksRequest{Username: "gigi"})
+	links, err = cli.GetLinks(om.GetLinksRequest{Username: "brijesh"})
 	Check(err)
-	log.Print("gigi's links:", links)
+	log.Print("brijesh's links:", links)
 }

@@ -44,7 +44,7 @@ var _ = Describe("DB link store tests", func() {
 	It("should add and get links", func() {
 		// No links initially
 		r := om.GetLinksRequest{
-			Username: "gigi",
+			Username: "brijesh",
 		}
 		res, err := linkStore.GetLinks(r)
 		Ω(err).Should(BeNil())
@@ -52,7 +52,7 @@ var _ = Describe("DB link store tests", func() {
 
 		// Add a link
 		r2 := om.AddLinkRequest{
-			Username: "gigi",
+			Username: "brijesh",
 			Url:      "https://golang.org/",
 			Title:    "Golang",
 			Tags:     map[string]bool{"programming": true},
@@ -72,7 +72,7 @@ var _ = Describe("DB link store tests", func() {
 	It("should update a link", func() {
 		// Add a link
 		r := om.AddLinkRequest{
-			Username: "gigi",
+			Username: "brijesh",
 			Url:      "https://golang.org/",
 			Title:    "Golang",
 			Tags:     map[string]bool{"programming": true},
@@ -89,7 +89,7 @@ var _ = Describe("DB link store tests", func() {
 		_, err = linkStore.UpdateLink(r2)
 		Ω(err).Should(BeNil())
 
-		r3 := om.GetLinksRequest{Username: "gigi"}
+		r3 := om.GetLinksRequest{Username: "brijesh"}
 		res, err := linkStore.GetLinks(r3)
 		Ω(err).Should(BeNil())
 		Ω(res.Links).Should(HaveLen(1))
@@ -101,7 +101,7 @@ var _ = Describe("DB link store tests", func() {
 	It("should delete a link", func() {
 		// Add a link
 		r := om.AddLinkRequest{
-			Username: "gigi",
+			Username: "brijesh",
 			Url:      "https://golang.org/",
 			Title:    "Golang",
 			Tags:     map[string]bool{"programming": true},
@@ -110,13 +110,13 @@ var _ = Describe("DB link store tests", func() {
 		Ω(err).Should(BeNil())
 
 		// Should have 1 link
-		r2 := om.GetLinksRequest{Username: "gigi"}
+		r2 := om.GetLinksRequest{Username: "brijesh"}
 		res, err := linkStore.GetLinks(r2)
 		Ω(err).Should(BeNil())
 		Ω(res.Links).Should(HaveLen(1))
 
 		// Delete the link
-		err = linkStore.DeleteLink("gigi", r.Url)
+		err = linkStore.DeleteLink("brijesh", r.Url)
 		Ω(err).Should(BeNil())
 
 		// There should be no more links

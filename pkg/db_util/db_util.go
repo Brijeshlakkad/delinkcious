@@ -3,13 +3,14 @@ package db_util
 import (
 	"database/sql"
 	"fmt"
-	sq "github.com/Masterminds/squirrel"
-	_ "github.com/lib/pq"
 	"log"
 	"os"
 	"os/exec"
 	"strconv"
 	"strings"
+
+	sq "github.com/Masterminds/squirrel"
+	_ "github.com/lib/pq"
 )
 
 type dbParams struct {
