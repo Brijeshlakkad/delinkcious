@@ -6,7 +6,7 @@ The user microservice. It uses a multi-stage [Dockerfile](Dockerfile) to generat
 ## Build Docker image
 
 ```
-$ docker build . -t brijeshlakkad/delinkcious-user-manager:${VERSION}
+$ docker build . -t g1g1/delinkcious-user-manager:${VERSION}
 ```
 
 ## Push to Registry
@@ -20,7 +20,7 @@ $ docker login
 Then push your image:
 
 ```
-$ docker push brijeshlakkad/delinkcious-user-manager:${VERSION}
+$ docker push g1g1/delinkcious-user-manager:${VERSION}
 ```
 
 ## Deploy to active Kubernetes cluster

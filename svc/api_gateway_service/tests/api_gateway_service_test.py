@@ -15,7 +15,7 @@ class APIGatewayServiceTest(TestCase):
         # add links
         params = dict(username='brijesh',
                       url='https://tutsplus.com/authors/brijesh-sayfan',
-                      title='Brijesh Tuts+ articles')
+                      title='Brijesh Lakkad Tuts+ articles')
         self.test_app.post(base_url, data=params)
 
     def tearDown(self):

@@ -94,29 +94,32 @@ func EnsureDB(host string, port int, username string, password string, dbName st
 	return
 }
 
-func DeleteFromTableIfExist(db *sql.DB, table string) (err error) {
-	_, err = db.Exec("DELETE from " + table)
+func DeleteFromTableIfExist(db *sql.DB, table string) error {
+	_, err := db.Exec("DELETE from " + table)
 	if err != nil {
-		if err.Error() != fmt.Sprint("pq: relation \"%s\" does not exist", table) {
-			return
+		expected := fmt.Sprintf("pq: relation \"%s\" does not exist", table)
+		message := err.Error()
+		if message != expected {
+			return err
 		}
 	}
-	return
+	return nil
 }
 
-func GetDbEndpoint(dbName string) (host string, port int, err error) {
-	hostEnvVar := strings.ToUpper(dbName) + "_DB_SERVICE_HOST"
+func GetDbEndpoint(serviceName string) (host string, port int, err error) {
+	hostEnvVar := strings.ToUpper(serviceName) + "_DB_SERVICE_HOST"
 	host = os.Getenv(hostEnvVar)
 	if host == "" {
 		host = "localhost"
 	}
 
-	portEnvVar := strings.ToUpper(dbName) + "_DB_SERVICE_PORT"
+	portEnvVar := strings.ToUpper(serviceName) + "_DB_SERVICE_PORT"
 	dbPort := os.Getenv(portEnvVar)
 	if dbPort == "" {
 		dbPort = "5432"
 	}
 
 	port, err = strconv.Atoi(dbPort)
+	log.Println("DB host:", host, "DB port:", dbPort)
 	return
 }

@@ -4,7 +4,10 @@ import (
 	"github.com/nats-io/nats.go"
 )
 
-const subject = "link-events"
+const (
+	subject = "link-events"
+	queue   = "the-queue"
+)
 
 func connect(url string) (encodedConn *nats.EncodedConn, err error) {
 	conn, err := nats.Connect(url)

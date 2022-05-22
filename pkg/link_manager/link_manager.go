@@ -1,10 +1,18 @@
 package link_manager
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
+	"log"
+	"net/http"
 
+	"github.com/Brijeshlakkad/delinkcious/pkg/link_checker_events"
 	om "github.com/Brijeshlakkad/delinkcious/pkg/object_model"
 )
+
+// Nuclio functions listen by default on port 8080 of their service IP
+const link_checker_func_url = "http://link-checker.nuclio.svc.cluster.local:8080"
 
 type LinkManager struct {
 	linkStore          LinkStore
@@ -48,6 +56,25 @@ func (m *LinkManager) getLinkCount(username string) (linkCount int64, err error)
 	return
 }
 
+func triggerLinkCheck(username string, url string) {
+	go func() {
+		checkLinkRequest := &om.CheckLinkRequest{Username: username, Url: url}
+		data, err := json.Marshal(checkLinkRequest)
+		if err != nil {
+			return
+		}
+
+		req, err := http.NewRequest("POST", link_checker_func_url, bytes.NewBuffer(data))
+		req.Header.Set("Content-Type", "application/json")
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		if err != nil {
+			return
+		}
+		defer resp.Body.Close()
+	}()
+}
+
 func (m *LinkManager) AddLink(request om.AddLinkRequest) (err error) {
 	if request.Url == "" {
 		return errors.New("the URL can't be empty")
@@ -71,6 +98,7 @@ func (m *LinkManager) AddLink(request om.AddLinkRequest) (err error) {
 		return
 	}
 
+	log.Printf("AddLink() user: %s, url: %s, title: %s\n", request.Username, request.Url, request.Title)
 	if m.eventSink != nil {
 		followers, err := m.socialGraphManager.GetFollowers(request.Username)
 		if err != nil {
@@ -82,6 +110,8 @@ func (m *LinkManager) AddLink(request om.AddLinkRequest) (err error) {
 		}
 	}
 
+	// Trigger link check asynchronously (don't wait for result)
+	triggerLinkCheck(request.Username, request.Url)
 	return
 }
 
@@ -140,8 +170,13 @@ func (m *LinkManager) DeleteLink(username string, url string) (err error) {
 	return
 }
 
+func (m *LinkManager) OnLinkChecked(username string, url string, status om.LinkStatus) {
+	m.linkStore.SetLinkStatus(username, url, status)
+}
+
 func NewLinkManager(linkStore LinkStore,
 	socialGraphManager om.SocialGraphManager,
+	natsUrl string,
 	eventSink om.LinkManagerEvents,
 	maxLinksPerUser int64) (om.LinkManager, error) {
 	if linkStore == nil {
@@ -152,10 +187,17 @@ func NewLinkManager(linkStore LinkStore,
 		return nil, errors.New("social graph manager can't be nil if event sink is not nil")
 	}
 
-	return &LinkManager{
+	link_manager := &LinkManager{
 		linkStore:          linkStore,
 		socialGraphManager: socialGraphManager,
 		eventSink:          eventSink,
 		maxLinksPerUser:    maxLinksPerUser,
-	}, nil
+	}
+
+	// Subscribe LinkManager to link checker events if nats is ocnfigured
+	if natsUrl != "" {
+		link_checker_events.Listen(natsUrl, link_manager)
+	}
+
+	return link_manager, nil
 }

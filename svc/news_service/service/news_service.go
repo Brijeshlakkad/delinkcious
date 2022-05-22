@@ -2,13 +2,12 @@ package service
 
 import (
 	"fmt"
-	"log"
-	"net"
-	"os"
-
 	"github.com/Brijeshlakkad/delinkcious/pb/news_service/pb"
 	nm "github.com/Brijeshlakkad/delinkcious/pkg/news_manager"
 	"google.golang.org/grpc"
+	"log"
+	"net"
+	"os"
 )
 
 func Run() {
@@ -21,9 +20,6 @@ func Run() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	natsHostname := os.Getenv("NATS_CLUSTER_SERVICE_HOST")
-	natsPort := os.Getenv("NATS_CLUSTER_SERVICE_PORT")
 
 	redisHostname := os.Getenv("NEWS_MANAGER_REDIS_SERVICE_HOST")
 	redisPort := os.Getenv("NEWS_MANAGER_REDIS_SERVICE_PORT")
@@ -38,6 +34,9 @@ func Run() {
 			log.Fatal(err)
 		}
 	}
+
+	natsHostname := os.Getenv("NATS_CLUSTER_SERVICE_HOST")
+	natsPort := os.Getenv("NATS_CLUSTER_SERVICE_PORT")
 
 	svc, err := nm.NewNewsManager(store, natsHostname, natsPort)
 	if err != nil {

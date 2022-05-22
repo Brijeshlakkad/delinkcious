@@ -2,18 +2,18 @@ package service
 
 import (
 	"fmt"
+	"github.com/Brijeshlakkad/delinkcious/pkg/db_util"
+	lm "github.com/Brijeshlakkad/delinkcious/pkg/link_manager"
+	"github.com/Brijeshlakkad/delinkcious/pkg/link_manager_events"
+	httptransport "github.com/go-kit/kit/transport/http"
+	"github.com/gorilla/mux"
+
+	om "github.com/Brijeshlakkad/delinkcious/pkg/object_model"
+	sgm "github.com/Brijeshlakkad/delinkcious/pkg/social_graph_client"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
-
-	"github.com/Brijeshlakkad/delinkcious/pkg/db_util"
-	lm "github.com/Brijeshlakkad/delinkcious/pkg/link_manager"
-	nats "github.com/Brijeshlakkad/delinkcious/pkg/link_manager_events"
-	om "github.com/Brijeshlakkad/delinkcious/pkg/object_model"
-	sgm "github.com/Brijeshlakkad/delinkcious/pkg/social_graph_client"
-	httptransport "github.com/go-kit/kit/transport/http"
-	"github.com/gorilla/mux"
 )
 
 type EventSink struct {
@@ -32,11 +32,10 @@ func (s *EventSink) OnLinkDeleted(username string, url string) {
 }
 
 func Run() {
-	dbHost, dbPort, err := db_util.GetDbEndpoint("social_graph")
+	dbHost, dbPort, err := db_util.GetDbEndpoint("link")
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	store, err := lm.NewDbLinkStore(dbHost, dbPort, "postgres", "postgres")
 	if err != nil {
 		log.Fatal(err)
@@ -75,10 +74,11 @@ func Run() {
 	natsHostname := os.Getenv("NATS_CLUSTER_SERVICE_HOST")
 	natsPort := os.Getenv("NATS_CLUSTER_SERVICE_PORT")
 
+	natsUrl := ""
 	var eventSink om.LinkManagerEvents
 	if natsHostname != "" {
-		natsUrl := natsHostname + ":" + natsPort
-		eventSink, err = nats.NewEventSender(natsUrl)
+		natsUrl = natsHostname + ":" + natsPort
+		eventSink, err = link_manager_events.NewEventSender(natsUrl)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -86,7 +86,7 @@ func Run() {
 		eventSink = &EventSink{}
 	}
 
-	svc, err := lm.NewLinkManager(store, socialGraphClient, eventSink, maxLinksPerUser)
+	svc, err := lm.NewLinkManager(store, socialGraphClient, natsUrl, eventSink, maxLinksPerUser)
 	if err != nil {
 		log.Fatal(err)
 	}

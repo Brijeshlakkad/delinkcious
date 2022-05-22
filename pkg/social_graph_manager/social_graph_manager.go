@@ -2,6 +2,7 @@ package social_graph_manager
 
 import (
 	"errors"
+	"log"
 
 	om "github.com/Brijeshlakkad/delinkcious/pkg/object_model"
 )
@@ -39,6 +40,10 @@ func (m *SocialGraphManager) GetFollowing(username string) (map[string]bool, err
 	return m.store.GetFollowing(username)
 }
 
-func (m *SocialGraphManager) GetFollowers(username string) (map[string]bool, error) {
-	return m.store.GetFollowers(username)
+func (m *SocialGraphManager) GetFollowers(username string) (result map[string]bool, err error) {
+	result, err = m.store.GetFollowers(username)
+	if err != nil {
+		log.Printf("Error in GetFollowers(), %v\n", err)
+	}
+	return
 }

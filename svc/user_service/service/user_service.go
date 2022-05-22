@@ -1,12 +1,11 @@
 package service
 
 import (
+	"github.com/Brijeshlakkad/delinkcious/pkg/db_util"
+	"github.com/gorilla/mux"
 	"log"
 	"net/http"
 	"os"
-
-	"github.com/Brijeshlakkad/delinkcious/pkg/db_util"
-	"github.com/gorilla/mux"
 
 	sgm "github.com/Brijeshlakkad/delinkcious/pkg/user_manager"
 	httptransport "github.com/go-kit/kit/transport/http"
@@ -17,7 +16,6 @@ func Run() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	store, err := sgm.NewDbUserStore(dbHost, dbPort, "postgres", "postgres")
 	if err != nil {
 		log.Fatal(err)

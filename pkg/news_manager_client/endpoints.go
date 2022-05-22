@@ -22,9 +22,9 @@ func encodeGetNewsRequest(_ context.Context, r interface{}) (interface{}, error)
 	}, nil
 }
 
-func newEvent(e *pb.Event) (event *om.Event) {
-	return &om.Event{
-		EventType: (om.EventTypeEnum)(e.EventType),
+func newEvent(e *pb.Event) (event *om.LinkManagerEvent) {
+	return &om.LinkManagerEvent{
+		EventType: (om.LinkManagerEventTypeEnum)(e.EventType),
 		Username:  e.Username,
 		Url:       e.Url,
 		Timestamp: time.Unix(e.Timestamp.GetSeconds(), (int64)(e.Timestamp.GetNanos())),

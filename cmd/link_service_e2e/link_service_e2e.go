@@ -69,7 +69,7 @@ func main() {
 
 	err = cli.AddLink(om.AddLinkRequest{Username: "brijesh",
 		Url:   "https://github.com/Brijeshlakkad",
-		Title: "Brijesh on Github",
+		Title: "Brijesh Lakkad on Github",
 		Tags:  map[string]bool{"programming": true}})
 	Check(err)
 	links, err = cli.GetLinks(om.GetLinksRequest{Username: "brijesh"})
@@ -81,6 +81,13 @@ func main() {
 		Description: "Most of my open source code is here"},
 	)
 
+	Check(err)
+	links, err = cli.GetLinks(om.GetLinksRequest{Username: "brijesh"})
+	Check(err)
+	log.Print("brijesh's links:", links)
+
+	err = cli.DeleteLink("brijesh", "https://github.com/Brijeshlakkad")
+	Check(err)
 	Check(err)
 	links, err = cli.GetLinks(om.GetLinksRequest{Username: "brijesh"})
 	Check(err)

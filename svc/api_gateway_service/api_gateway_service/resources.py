@@ -5,6 +5,7 @@ import requests
 from flask import request
 from flask_restful import Resource, abort
 from flask_restful.reqparse import RequestParser
+from urllib.parse import urlencode
 
 github = None
 
@@ -35,8 +36,6 @@ class Link(Resource):
 
     def get(self):
         """Get all links
-
-        If user doesn't exist create it (with no goals)
         """
         username, email = _get_user()
         parser = RequestParser()
@@ -92,7 +91,79 @@ class Link(Resource):
         parser.add_argument('url', type=str, required=True)
         args = parser.parse_args()
         args.update(username=username)
-        r = requests.delete(self.base_url, **args)
+        url = '{}?{}'.format(self.base_url, urlencode(args))
+        r = requests.delete(url)
+        if not r.ok:
+            abort(r.status_code, message=r.content)
+        return r.json()
+
+
+class Followers(Resource):
+    host = os.environ.get('SOCIAL_GRAPH_MANAGER_SERVICE_HOST', 'localhost')
+    port = os.environ.get('SOCIAL_GRAPH_MANAGER_SERVICE_PORT', '9090')
+    base_url = 'http://{}:{}'.format(host, port)
+
+    def get(self):
+        """Get users that follow current user
+        """
+        username, email = _get_user()
+        r = requests.get('{}/followers/{}'.format(self.base_url, username))
+
+        if not r.ok:
+            abort(r.status_code, message=r.content)
+
+        return r.json()
+
+    def post(self):
+        """Add a new follower to the current user"""
+        username, email = _get_user()
+        parser = RequestParser()
+        parser.add_argument('follower', type=str, required=True)
+        args = parser.parse_args()
+        args.update(followed=username)
+        r = requests.post(self.base_url + '/follow', json=args)
+        if not r.ok:
+            abort(r.status_code, message=r.content)
+
+        return r.json()
+
+class Following(Resource):
+    host = os.environ.get('SOCIAL_GRAPH_MANAGER_SERVICE_HOST', 'localhost')
+    port = os.environ.get('SOCIAL_GRAPH_MANAGER_SERVICE_PORT', '9090')
+    base_url = 'http://{}:{}'.format(host, port)
+
+    def get(self):
+        """Get user current user is following
+        """
+        username, email = _get_user()
+        r = requests.get('{}/following/{}'.format(self.base_url, username))
+
+        if not r.ok:
+            abort(r.status_code, message=r.content)
+
+        return r.json()
+
+    def post(self):
+        """Have current user follow another user"""
+        username, email = _get_user()
+        parser = RequestParser()
+        parser.add_argument('followed', type=str, required=True)
+        args = parser.parse_args()
+        args.update(follower=username)
+        r = requests.post(self.base_url + '/follow', json=args)
+        if not r.ok:
+            abort(r.status_code, message=r.content)
+
+        return r.json()
+
+    def delete(self):
+        """Have current user follow another user"""
+        username, email = _get_user()
+        parser = RequestParser()
+        parser.add_argument('followed', type=str, required=True)
+        args = parser.parse_args()
+        args.update(follower=username)
+        r = requests.post(self.base_url + '/unfollow', json=args)
         if not r.ok:
             abort(r.status_code, message=r.content)
 

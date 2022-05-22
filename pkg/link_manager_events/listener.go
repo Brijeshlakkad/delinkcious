@@ -10,7 +10,7 @@ func Listen(url string, sink om.LinkManagerEvents) (err error) {
 		return
 	}
 
-	conn.Subscribe(subject, func(e *Event) {
+	conn.QueueSubscribe(subject, queue, func(e *Event) {
 		switch e.EventType {
 		case om.LinkAdded:
 			{
@@ -18,7 +18,7 @@ func Listen(url string, sink om.LinkManagerEvents) (err error) {
 			}
 		case om.LinkUpdated:
 			{
-				sink.OnLinkAdded(e.Username, e.Link)
+				sink.OnLinkUpdated(e.Username, e.Link)
 			}
 		default:
 			// Ignore other event types

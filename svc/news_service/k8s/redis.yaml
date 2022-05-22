@@ -46,6 +46,7 @@ spec:
   selector:
     app: redis
     svc: news-manager
+  clusterIP: None
   ports:
   - port: 6379
     name: redis

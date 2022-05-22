@@ -4,12 +4,16 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"net/http"
-
 	"github.com/go-kit/kit/endpoint"
+	"net/http"
 
 	om "github.com/Brijeshlakkad/delinkcious/pkg/object_model"
 )
+
+type deleteLinkRequest struct {
+	Username string
+	Url      string
+}
 
 type SimpleResponse struct {
 	Err string
@@ -77,7 +81,7 @@ func (s EndpointSet) UpdateLink(req om.UpdateLinkRequest) (err error) {
 }
 
 func (s EndpointSet) DeleteLink(username string, url string) (err error) {
-	resp, err := s.DeleteLinkEndpoint(context.Background(), &deleteRequest{Username: username, Url: url})
+	resp, err := s.DeleteLinkEndpoint(context.Background(), &deleteLinkRequest{Username: username, Url: url})
 	if err != nil {
 		return err
 	}

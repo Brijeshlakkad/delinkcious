@@ -10,7 +10,7 @@ import (
 	"github.com/golang/protobuf/ptypes/timestamp"
 )
 
-func newEvent(e *om.Event) (event *pb.Event) {
+func newEvent(e *om.LinkManagerEvent) (event *pb.Event) {
 	event = &pb.Event{
 		EventType: (pb.EventType)(e.EventType),
 		Username:  e.Username,
