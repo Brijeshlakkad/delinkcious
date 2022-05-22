@@ -3,9 +3,10 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"net/http"
+
 	om "github.com/Brijeshlakkad/delinkcious/pkg/object_model"
 	"github.com/go-kit/kit/endpoint"
-	"net/http"
 )
 
 type registerRequest struct {

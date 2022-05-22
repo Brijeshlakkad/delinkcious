@@ -34,23 +34,23 @@ func main() {
 	initDB()
 
 	ctx := context.Background()
-	defer KillServer(ctx)
+	defer StopService(ctx)
 	RunService(ctx, ".", "user_service")
 
 	// Run some tests with the client
 	cli, err := user_client.NewClient("localhost:7070")
 	check(err)
 
-	err = cli.Register(om.User{"gg@gg.com", "brijesh"})
+	err = cli.Register(om.User{"gg@gg.com", "Brijesh Lakkad"})
 	check(err)
-	log.Print("brijesh has registered successfully")
+	log.Print("Brijesh Lakkad has registered successfully")
 
-	session, err := cli.Login("brijesh", "secret")
+	session, err := cli.Login("Brijesh Lakkad", "secret")
 	check(err)
-	log.Print("brijesh has logged in successfully. the session is: ", session)
+	log.Print("Brijesh Lakkad has logged in successfully. the session is: ", session)
 
-	err = cli.Logout("brijesh", session)
+	err = cli.Logout("Brijesh Lakkad", session)
 	check(err)
-	log.Print("brijesh has logged out successfully.")
+	log.Print("Brijesh Lakkad has logged out successfully.")
 
 }

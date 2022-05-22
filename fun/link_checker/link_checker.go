@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+
 	"github.com/Brijeshlakkad/delinkcious/pkg/link_checker"
 	"github.com/Brijeshlakkad/delinkcious/pkg/link_checker_events"
 	om "github.com/Brijeshlakkad/delinkcious/pkg/object_model"

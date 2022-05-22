@@ -49,7 +49,7 @@ func main() {
 	initDB()
 
 	ctx := context.Background()
-	defer KillServer(ctx)
+	defer StopService(ctx)
 
 	if os.Getenv("RUN_SOCIAL_GRAPH_SERVICE") == "true" {
 		runSocialGraphService(ctx)
@@ -63,33 +63,33 @@ func main() {
 	cli, err := link_manager_client.NewClient("localhost:8080")
 	Check(err)
 
-	links, err := cli.GetLinks(om.GetLinksRequest{Username: "brijesh"})
+	links, err := cli.GetLinks(om.GetLinksRequest{Username: "Brijesh Lakkad"})
 	Check(err)
-	log.Print("brijesh's links:", links)
+	log.Print("Brijesh Lakkad's links:", links)
 
-	err = cli.AddLink(om.AddLinkRequest{Username: "brijesh",
+	err = cli.AddLink(om.AddLinkRequest{Username: "Brijesh Lakkad",
 		Url:   "https://github.com/Brijeshlakkad",
 		Title: "Brijesh Lakkad on Github",
 		Tags:  map[string]bool{"programming": true}})
 	Check(err)
-	links, err = cli.GetLinks(om.GetLinksRequest{Username: "brijesh"})
+	links, err = cli.GetLinks(om.GetLinksRequest{Username: "Brijesh Lakkad"})
 	Check(err)
-	log.Print("brijesh's links:", links)
+	log.Print("Brijesh Lakkad's links:", links)
 
-	err = cli.UpdateLink(om.UpdateLinkRequest{Username: "brijesh",
+	err = cli.UpdateLink(om.UpdateLinkRequest{Username: "Brijesh Lakkad",
 		Url:         "https://github.com/Brijeshlakkad",
 		Description: "Most of my open source code is here"},
 	)
 
 	Check(err)
-	links, err = cli.GetLinks(om.GetLinksRequest{Username: "brijesh"})
+	links, err = cli.GetLinks(om.GetLinksRequest{Username: "Brijesh Lakkad"})
 	Check(err)
-	log.Print("brijesh's links:", links)
+	log.Print("Brijesh Lakkad's links:", links)
 
-	err = cli.DeleteLink("brijesh", "https://github.com/Brijeshlakkad")
+	err = cli.DeleteLink("Brijesh Lakkad", "https://github.com/Brijeshlakkad")
 	Check(err)
 	Check(err)
-	links, err = cli.GetLinks(om.GetLinksRequest{Username: "brijesh"})
+	links, err = cli.GetLinks(om.GetLinksRequest{Username: "Brijesh Lakkad"})
 	Check(err)
-	log.Print("brijesh's links:", links)
+	log.Print("Brijesh Lakkad's links:", links)
 }

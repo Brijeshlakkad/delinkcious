@@ -1,9 +1,8 @@
 import json
+from api_gateway_service.api import create_app
 from unittest import TestCase
 
-from api_gateway_service.api import create_app
-
-base_url = '/v1.0/links'
+base_url = '/v1/links'
 
 
 class APIGatewayServiceTest(TestCase):
@@ -13,18 +12,18 @@ class APIGatewayServiceTest(TestCase):
         self.test_app = self.app.test_client()
 
         # add links
-        params = dict(username='brijesh',
-                      url='https://tutsplus.com/authors/brijesh-sayfan',
+        params = dict(username='Brijesh Lakkad',
+                      url='https://tutsplus.com/authors/Brijesh Lakkad-sayfan',
                       title='Brijesh Lakkad Tuts+ articles')
         self.test_app.post(base_url, data=params)
 
     def tearDown(self):
-        params = dict(username='brijesh',
-                      url='https://tutsplus.com/authors/brijesh-sayfan')
+        params = dict(username='Brijesh Lakkad',
+                      url='https://tutsplus.com/authors/Brijesh Lakkad-sayfan')
         self.test_app.post(base_url, data=params)
 
     def test_get_links(self):
-        url = base_url + '?username=brijesh'
+        url = base_url + '?username=Brijesh Lakkad'
         response = self.test_app.get(url, headers='')
         result = json.loads(response.data)
         expected = {}

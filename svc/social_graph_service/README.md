@@ -6,7 +6,7 @@ The social graph microservice. It uses a multi-stage [Dockerfile](Dockerfile) to
 ## Build Docker image
 
 ```
-$ docker build . -t brijeshlakkad/delinkcious-social-graph:${VERSION}
+$ docker build -t brijeshlakkad/delinkcious-social-graph:${VERSION} .
 ```
 
 ## Push to Registry

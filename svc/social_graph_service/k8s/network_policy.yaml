@@ -2,7 +2,6 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: allow-social-graph-db
-  namespace: default
 spec:
   podSelector:
     matchLabels:
@@ -22,7 +21,6 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: allow-link-to-social-graph
-  namespace: default
 spec:
   podSelector:
     matchLabels:

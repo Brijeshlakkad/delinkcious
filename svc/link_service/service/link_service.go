@@ -2,18 +2,20 @@ package service
 
 import (
 	"fmt"
+
 	"github.com/Brijeshlakkad/delinkcious/pkg/db_util"
 	lm "github.com/Brijeshlakkad/delinkcious/pkg/link_manager"
 	"github.com/Brijeshlakkad/delinkcious/pkg/link_manager_events"
 	httptransport "github.com/go-kit/kit/transport/http"
 	"github.com/gorilla/mux"
 
-	om "github.com/Brijeshlakkad/delinkcious/pkg/object_model"
-	sgm "github.com/Brijeshlakkad/delinkcious/pkg/social_graph_client"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
+
+	om "github.com/Brijeshlakkad/delinkcious/pkg/object_model"
+	sgm "github.com/Brijeshlakkad/delinkcious/pkg/social_graph_client"
 )
 
 type EventSink struct {
@@ -121,6 +123,6 @@ func Run() {
 	r.Methods("PUT").Path("/links").Handler(updateLinkHandler)
 	r.Methods("DELETE").Path("/links").Handler(deleteLinkHandler)
 
-	log.Printf("Listening on port %s...\n", port)
+	log.Printf("*** Listening on port %s...\n", port)
 	log.Fatal(http.ListenAndServe(":"+port, r))
 }

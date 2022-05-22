@@ -6,7 +6,7 @@ The link microservice. It uses a multi-stage [Dockerfile](Dockerfile) to generat
 ## Build Docker image
 
 ```
-$ docker build . -t brijeshlakkad/delinkcious-link-manager:${VERSION}
+$ docker build -t brijeshlakkad/delinkcious-link:${VERSION} .
 ```
 
 ## Push to Registry
@@ -20,7 +20,7 @@ $ docker login
 Then push your image:
 
 ```
-$ docker push brijeshlakkad/delinkcious-link-manager:${VERSION}
+$ docker push brijeshlakkad/delinkcious-link:${VERSION}
 ```
 
 ## Deploy to active Kubernetes cluster
@@ -36,6 +36,8 @@ $ kubectl create -f k8s
 ```
 kubectl port-forward svc/link-manager 8080:8080
 ```
+
+
 
 
 

@@ -36,7 +36,7 @@ func runNewsService(ctx context.Context) {
 
 func main() {
 	ctx := context.Background()
-	defer KillServer(ctx)
+	defer StopService(ctx)
 
 	fmt.Println("Launching local NATS server...")
 	err := RunLocalNatsServer()
@@ -64,11 +64,11 @@ func main() {
 
 	time.Sleep(time.Second * 1)
 	fmt.Println("Sending OnLinkAdded event...")
-	sender.OnLinkAdded("brijesh", &om.Link{Url: "http://example.org", Title: "Example"})
+	sender.OnLinkAdded("Brijesh Lakkad", &om.Link{Url: "http://example.org", Title: "Example"})
 	time.Sleep(time.Second * 1)
 
 	fmt.Println("Fetching news...")
-	res, err := cli.GetNews(om.GetNewsRequest{Username: "brijesh"})
+	res, err := cli.GetNews(om.GetNewsRequest{Username: "Brijesh Lakkad"})
 	Check(err)
 
 	for _, e := range res.Events {

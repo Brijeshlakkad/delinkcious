@@ -23,7 +23,8 @@ kubectl port-forward svc/api-gateway 5000:5000
 
 # Build Api Gateway image
 ```
-docker build -t brijeshlakkad/delinkcious-api-gateway:0.3 .
+docker build -t brijeshlakkad/delinkcious-api-gateway:${VERSION} .
+docker push brijeshlakkad/delinkcious-api-gateway:${VERSION}
 ```
 
 

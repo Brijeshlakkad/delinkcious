@@ -3,10 +3,11 @@ package service
 import (
 	"context"
 	"encoding/json"
-	om "github.com/Brijeshlakkad/delinkcious/pkg/object_model"
-	"github.com/go-kit/kit/endpoint"
 	"net/http"
 	"time"
+
+	om "github.com/Brijeshlakkad/delinkcious/pkg/object_model"
+	"github.com/go-kit/kit/endpoint"
 )
 
 type link struct {
