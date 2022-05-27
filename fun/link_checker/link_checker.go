@@ -2,45 +2,52 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
+	"net/http"
+
+	"io/ioutil"
 
 	"github.com/Brijeshlakkad/delinkcious/pkg/link_checker"
 	"github.com/Brijeshlakkad/delinkcious/pkg/link_checker_events"
 	om "github.com/Brijeshlakkad/delinkcious/pkg/object_model"
-	"github.com/nuclio/nuclio-sdk-go"
 )
 
 const natsUrl = "nats-cluster.default.svc.cluster.local:4222"
 
-func Handler(context *nuclio.Context, event nuclio.Event) (interface{}, error) {
-	r := nuclio.Response{
-		StatusCode:  200,
-		ContentType: "application/text",
+type msg struct {
+	Content string `json:"content"`
+}
+
+func Handler(w http.ResponseWriter, r *http.Request) {
+	reqBody, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
 	}
 
-	body := event.GetBody()
 	var e om.CheckLinkRequest
-	err := json.Unmarshal(body, &e)
+	err = json.Unmarshal(reqBody, &e)
+
+	response := msg{}
+
+	respBody, err := json.Marshal(response)
 	if err != nil {
-		msg := fmt.Sprintf("failed to unmarshal body: %v", body)
-		context.Logger.Error(msg)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+	}
 
-		r.StatusCode = 400
-		r.Body = []byte(fmt.Sprintf(msg))
-		return r, errors.New(msg)
-
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
 	}
 
 	username := e.Username
 	url := e.Url
 	if username == "" || url == "" {
-		msg := fmt.Sprintf("missing USERNAME ('%s') and/or URL ('%s')", username, url)
-		context.Logger.Error(msg)
+		errorMessage := fmt.Sprintf("missing USERNAME ('%s') and/or URL ('%s')", username, url)
 
-		r.StatusCode = 400
-		r.Body = []byte(msg)
-		return r, errors.New(msg)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(errorMessage))
 	}
 
 	status := om.LinkStatusValid
@@ -51,15 +58,12 @@ func Handler(context *nuclio.Context, event nuclio.Event) (interface{}, error) {
 
 	sender, err := link_checker_events.NewEventSender(natsUrl)
 	if err != nil {
-		context.Logger.Error(err.Error())
-
-		r.StatusCode = 500
-		r.Body = []byte(err.Error())
-		return r, err
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte(err.Error()))
 	}
 
 	sender.OnLinkChecked(username, url, status)
-	return r, nil
+	w.Write([]byte(respBody))
 }
 
 func main() {
