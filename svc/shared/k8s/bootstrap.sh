@@ -103,16 +103,16 @@ helm init --service-account tiller
 
 # Create an image pull secret, so Nuclio can deploy functions to our cluster.
 kubectl create secret docker-registry registry-credentials -n nuclio \
-  --docker-username g1g1 \
+  --docker-username brijeshlakkad \
   --docker-password $DOCKERHUB_PASSWORD \
   --docker-server registry.hub.docker.com \
-  --docker-email the.Brijesh Lakkad@gmail.com
+  --docker-email brijeshlakkad22@gmail.com
 
 
 # Deploy the link checker nuclio function
 pushd .
 cd ../../../fun/link_checker
-nuctl deploy link-checker -n nuclio -p . --registry g1g1
+nuctl deploy link-checker -n nuclio -p . --registry brijeshlakkad
 popd
 
 

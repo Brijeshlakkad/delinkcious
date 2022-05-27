@@ -7,7 +7,7 @@ for f in yaml_files:
 
 
 # Get service name
-script = """import os; print('-'.join(os.getcwd().split("/")[-1].split("_")[:-1]),"""
+script = """python -c 'import os; print("-".join(os.getcwd().split("/")[-1].split("_")[:-1]))'"""
 name = str(local(script))[:-1]
 
 docker_build('brijeshlakkad/delinkcious-' + name, '.', dockerfile='Dockerfile.dev')
