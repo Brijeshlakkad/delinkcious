@@ -2,24 +2,30 @@ package service
 
 import (
 	"fmt"
-
-	"github.com/Brijeshlakkad/delinkcious/pkg/db_util"
-	lm "github.com/Brijeshlakkad/delinkcious/pkg/link_manager"
-	"github.com/Brijeshlakkad/delinkcious/pkg/link_manager_events"
-	httptransport "github.com/go-kit/kit/transport/http"
-	"github.com/gorilla/mux"
-
-	"log"
+	"io"
 	"net/http"
 	"os"
 	"strconv"
 
+	httptransport "github.com/go-kit/kit/transport/http"
+	"github.com/gorilla/mux"
+	"github.com/opentracing/opentracing-go"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/uber/jaeger-client-go"
+	jeagerconfig "github.com/uber/jaeger-client-go/config"
+
+	"github.com/Brijeshlakkad/delinkcious/pkg/db_util"
+	lm "github.com/Brijeshlakkad/delinkcious/pkg/link_manager"
+	"github.com/Brijeshlakkad/delinkcious/pkg/link_manager_events"
+	"github.com/Brijeshlakkad/delinkcious/pkg/log"
 	om "github.com/Brijeshlakkad/delinkcious/pkg/object_model"
 	sgm "github.com/Brijeshlakkad/delinkcious/pkg/social_graph_client"
 )
 
 type EventSink struct {
 }
+
+type linkManagerMiddleware func(om.LinkManager) om.LinkManager
 
 func (s *EventSink) OnLinkAdded(username string, link *om.Link) {
 	//log.Println("Link added")
@@ -31,6 +37,27 @@ func (s *EventSink) OnLinkUpdated(username string, link *om.Link) {
 
 func (s *EventSink) OnLinkDeleted(username string, url string) {
 	//log.Println("Link deleted")
+}
+
+// createTracer returns an instance of Jaeger Tracer that samples
+// 100% of traces and logs all spans to stdout.
+func createTracer(service string) (opentracing.Tracer, io.Closer) {
+	cfg := &jeagerconfig.Configuration{
+		ServiceName: service,
+		Sampler: &jeagerconfig.SamplerConfig{
+			Type:  "const",
+			Param: 1,
+		},
+		Reporter: &jeagerconfig.ReporterConfig{
+			LogSpans: true,
+		},
+	}
+	logger := jeagerconfig.Logger(jaeger.StdLogger)
+	tracer, closer, err := cfg.NewTracer(logger)
+	if err != nil {
+		panic(fmt.Sprintf("ERROR: cannot create tracer: %v\n", err))
+	}
+	return tracer, closer
 }
 
 func Run() {
@@ -88,10 +115,27 @@ func Run() {
 		eventSink = &EventSink{}
 	}
 
+	// Create a logger
+	logger := log.NewLogger("link manager")
+
+	// Create a tracer
+	tracer, closer := createTracer("link-manager")
+	defer closer.Close()
+
+	// Create the service implementation
 	svc, err := lm.NewLinkManager(store, socialGraphClient, natsUrl, eventSink, maxLinksPerUser)
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	// Hook up the logging middleware to the service and the logger
+	svc = newLoggingMiddleware(logger)(svc)
+
+	// Hook up the metrics middleware
+	svc = newMetricsMiddleware()(svc)
+
+	// Hook up the tracing middleware
+	svc = newTracingMiddleware(tracer)(svc)
 
 	getLinksHandler := httptransport.NewServer(
 		makeGetLinksEndpoint(svc),
@@ -122,7 +166,8 @@ func Run() {
 	r.Methods("POST").Path("/links").Handler(addLinkHandler)
 	r.Methods("PUT").Path("/links").Handler(updateLinkHandler)
 	r.Methods("DELETE").Path("/links").Handler(deleteLinkHandler)
+	r.Methods("GET").Path("/metrics").Handler(promhttp.Handler())
 
-	log.Printf("*** Listening on port %s...\n", port)
+	logger.Log("msg", "*** listening on ***", "port", port)
 	log.Fatal(http.ListenAndServe(":"+port, r))
 }

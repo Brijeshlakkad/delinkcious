@@ -1,6 +1,8 @@
 package social_graph_manager
 
 import (
+	"log"
+
 	"github.com/Brijeshlakkad/delinkcious/pkg/db_util"
 	om "github.com/Brijeshlakkad/delinkcious/pkg/object_model"
 	sq "github.com/Masterminds/squirrel"
@@ -18,10 +20,28 @@ var _ = Describe("social graph manager tests with DB", func() {
 	}
 
 	BeforeSuite(func() {
-		dbHost, dbPort, err := db_util.GetDbEndpoint("social_graph")
+		var err error
+		dbHost, dbPort, err := db_util.GetDbEndpoint("scoial_graph_manager")
 		Ω(err).Should(BeNil())
+
 		socialGraphStore, err = NewDbSocialGraphStore(dbHost, dbPort, "postgres", "postgres")
+		if err != nil {
+			_, err = db_util.RunLocalDB("postgres")
+			Ω(err).Should(BeNil())
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			socialGraphStore, err = NewDbSocialGraphStore(dbHost, dbPort, "postgres", "postgres")
+			Ω(err).Should(BeNil())
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+
 		Ω(err).Should(BeNil())
+		Ω(socialGraphStore).ShouldNot(BeNil())
+
 		socialGraphManager, err = NewSocialGraphManager(socialGraphStore)
 		Ω(err).Should(BeNil())
 		Ω(socialGraphManager).ShouldNot(BeNil())
@@ -32,7 +52,9 @@ var _ = Describe("social graph manager tests with DB", func() {
 	})
 
 	AfterSuite(func() {
-		deleteAll()
+		if socialGraphStore != nil && socialGraphStore.db != nil {
+			deleteAll()
+		}
 	})
 
 	It("should follow", func() {
