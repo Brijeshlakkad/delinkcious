@@ -63,13 +63,13 @@ def deploy_delinkcious_services():
     project = 'default'
     ns = 'default'
     description = 'Delicious-like link management system'
-    repo = 'https://github.com/Brijeshlakkad/delinkcious'
+    repo = 'git@github.com:Brijeshlakkad/delinkcious-kubernetes.git'
     # create_project(project, 'https://kubernetes.default.svc', ns, '', repo)
     for app in 'link social-graph user news api-gateway'.split():
         service = app.replace('-', '_') + '_service'
-        create_app(app, project, ns, repo, f'svc/{service}/k8s')
+        create_app(app, project, ns, repo, f'svc/{service}')
         sync_app(app)
 
 
 if __name__ == '__main__':
-    deploy_delinkcious()
+    deploy_delinkcious_services()
