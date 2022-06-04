@@ -42,3 +42,21 @@ export FISSION_ROUTER=$(minikube ip):$(kubectl -n fission get svc router -o json
 ```
 
 curl -X POST http://$FISSION_ROUTER/link-checker -d '{"username": "brijeshlakkad"}'
+
+
+# Knative
+
+```
+$ docker build -t brijeshlakkad/link-checker:0.1 .
+$ docker push brijeshlakkad/link-checker:0.1
+```
+
+```
+$ kn service create link-checker \
+--image brijeshlakkad/link-checker:0.1 \
+--port 8080
+
+$ kn service update link-checker \
+--image brijeshlakkad/link-checker:0.1 \
+--port 8080
+```

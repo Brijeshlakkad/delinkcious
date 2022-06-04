@@ -43,7 +43,7 @@ def run(cmd, echo=True):
 def enable_minikube_addons():
     """ """
     addons = 'ingress heapster efk metrics-server'.split()
-    for addons in addons:
+    for addon in addons:
         run('minikube addons enable ' + addon)
 
 

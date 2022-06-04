@@ -1,14 +1,13 @@
-FROM golang:1.11
+FROM golang:alpine AS builder
 
-RUN go get github.com/Brijeshlakkad/delinkcious/...
-
-WORKDIR /go/src/github.com/Brijeshlakkad/delinkcious/svc/link_service
+WORKDIR $GOROOT/src/github.com/Brijeshlakkad/delinkcious/svc/link_service
 ADD ./main.go main.go
 ADD ./service service
 
-# Fetch dependencies
-RUN go get -d -v
+RUN go mod init link_service
 
+# Fetch dependencies
+RUN go get
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o /link_service -a -tags netgo -ldflags '-s -w' .
 

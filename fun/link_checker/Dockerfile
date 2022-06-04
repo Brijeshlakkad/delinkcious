@@ -1,35 +1,29 @@
-ARG NUCLIO_LABEL=latest
-ARG NUCLIO_ARCH=amd64
-ARG NUCLIO_BASE_IMAGE=alpine:3.11
-ARG NUCLIO_ONBUILD_IMAGE=nuclio/handler-builder-golang-onbuild:0.4.0-amd64
+# Use the offical Golang image to create a build artifact.
+# This is based on Debian and sets the GOPATH to /go.
+# https://hub.docker.com/_/golang
+FROM golang:alpine AS builder
 
-# Supplies processor uhttpc, used for healthcheck
-FROM nuclio/uhttpc:0.0.1-amd64 as uhttpc
-
-# Builds source, supplies processor binary and handler plugin
-FROM ${NUCLIO_ONBUILD_IMAGE} as builder
-
-# From the base image
-FROM ${NUCLIO_BASE_IMAGE}
-
+# Copy local code to the container image.
 WORKDIR $GOROOT/src/github.com/Brijeshlakkad/delinkcious/fun/link_checker
-
-ADD ./link_checker.go link_checker.go
+ADD ./main.go main.go
 
 RUN go mod init link_checker
 
 # Fetch dependencies
 RUN go get
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o /link_checker -a -tags netgo -ldflags '-s -w' .
+# Build the command inside the container.
+# (You may fetch or manage dependencies here,
+# either manually or with a tool like "godep".)
+RUN CGO_ENABLED=0 GOOS=linux go build -v -o /link_checker
 
-# Copy required objects from the suppliers
-COPY --from=builder /home/nuclio/bin/processor /usr/local/bin/processor
-COPY --from=builder /home/nuclio/bin/handler.so /opt/nuclio/handler.so
-COPY --from=uhttpc /home/nuclio/bin/uhttpc /usr/local/bin/uhttpc
+# Use a Docker multi-stage build to create a lean production image.
+# https://docs.docker.com/develop/develop-images/multistage-build/#use-multi-stage-builds
+FROM registry.cn-hangzhou.aliyuncs.com/knative-sample/alpine-sh:3.9
+# RUN apk add --no-cache ca-certificates
 
-# Readiness probe
-HEALTHCHECK --interval=1s --timeout=3s CMD /usr/local/bin/uhttpc --url http://127.0.0.1:8082/ready || exit 1
+# Copy the binary to the production image from the builder stage.
+COPY --from=builder /link_checker /app/link_checker
 
-# Run processor with configuration and platform configuration
-CMD [ "processor" ]
+# Run the web service on container startup.
+CMD ["/app/link_checker"]
